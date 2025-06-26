@@ -1,0 +1,53 @@
+-- Step 1: Drop old database if exists (optional, careful with data loss!)
+DROP DATABASE IF EXISTS atmdb;
+
+-- Step 2: Create a new database
+CREATE DATABASE atmdb;
+
+-- Step 3: Connect to the new database (run this command separately in psql)
+\c atmdb
+
+-- Step 4: Create the 'users' table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    card_number VARCHAR(50) UNIQUE NOT NULL,
+    pin VARCHAR(10) NOT NULL,
+    balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    role VARCHAR(20) CHECK (role IN ('customer', 'technician')) NOT NULL
+);
+
+-- Step 5: Create the 'transactions' table
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    userId INT REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Step 6: Create the 'resources' table
+CREATE TABLE resources (
+    id SERIAL PRIMARY KEY,
+    ink INT DEFAULT 100,
+    paper INT DEFAULT 100,
+    cash INT DEFAULT 1000,
+    software_update INT DEFAULT 100
+);
+
+-- Step 7: Insert sample users (1 technician + 3 customers)
+INSERT INTO users (name, card_number, pin, balance, role) VALUES
+('techguy', 'card0', '0000', 0.00, 'technician'),
+('john',    'card1', '1234', 490.00, 'customer'),
+('bill',    'card2', '5678', 220.00, 'customer'),
+('dolores', 'card3', '1122', 0.00,  'customer');
+
+-- Step 8: Insert initial resource values
+INSERT INTO resources (ink, paper, cash, software_update)
+VALUES (100, 100, 1000, 100);
+
+-- Step 9: Show inserted users
+SELECT * FROM users;
+
+-- Step 10: Show resources
+SELECT * FROM resources;
