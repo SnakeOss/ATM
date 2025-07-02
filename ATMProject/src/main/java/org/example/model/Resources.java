@@ -45,11 +45,17 @@ public class Resources {
     }
 
     // Resource status checks
+    // Replace your existing methods with these:
+
     public boolean isLowOnResources() {
-        return ink <= 20 || paper <= 20 || cash <= 20;
+        return (ink > 0 && ink <= 20) || (paper > 0 && paper <= 20) || (cash > 0 && cash <= 20);
     }
 
     public boolean isOutOfResources() {
         return ink == 0 || paper == 0 || cash == 0;
     }
+    public boolean isOutOfInkAndPaper() {
+        return ink == 0 && paper == 0;
+    }
+
 }

@@ -51,8 +51,8 @@ public class ConsoleView {
 
         if (loggedInUser != null) {
             System.out.println("Login successful. Welcome, " + loggedInUser.getName() + "!");
-            if ("technician".equals(loggedInUser.getRole())) {
-                showTechnicianMenu();
+            if ("technician".equalsIgnoreCase(loggedInUser.getRole())) {
+                showTechnicianMenu();  // <-- call technician menu here
             } else {
                 showUserMenu();
             }
@@ -101,39 +101,6 @@ public class ConsoleView {
         }
     }
 
-    private void showTechnicianMenu() {
-        while (true) {
-            System.out.println("\nTechnician Menu:");
-            System.out.println("1. View Resources");
-            System.out.println("2. Refill Resources");
-            System.out.println("0. Logout");
-            System.out.print("Select an option: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            switch (choice) {
-                case 1:
-                    viewResources();
-                    break;
-                case 2:
-                    refillResources();
-                    break;
-                case 3:
-                    addNewUser();
-                    break;
-                case 4:
-                    viewAllUsers();
-                    break;
-                case 0:
-                    System.out.println("Logging out...");
-                    loggedInUser = null;
-                    return;
-                default:
-                    System.out.println("Invalid choice, try again.");
-            }
-        }
-    }
-
     private void checkBalance() {
         double balance = userController.checkBalance(loggedInUser.getId());
         System.out.println("Your current balance: $" + balance);
@@ -142,6 +109,7 @@ public class ConsoleView {
     private void depositFunds() {
         System.out.print("Enter deposit amount: ");
         double amount = scanner.nextDouble();
+        scanner.nextLine(); // consume newline
         if (transactionController.deposit(loggedInUser.getId(), amount)) {
             System.out.println("Deposit successful!");
         } else {
@@ -153,10 +121,11 @@ public class ConsoleView {
     private void withdrawFunds() {
         System.out.print("Enter withdrawal amount: ");
         double amount = scanner.nextDouble();
+        scanner.nextLine(); // consume newline
         if (transactionController.withdraw(loggedInUser.getId(), amount)) {
             System.out.println("Withdrawal successful!");
         } else {
-            System.out.println("Insufficient funds or invalid amount.");
+            System.out.println("Withdraw Failed!.");
         }
         displayResourcesStatus();
     }
@@ -167,6 +136,7 @@ public class ConsoleView {
 
         System.out.print("Enter amount to transfer: ");
         double amount = scanner.nextDouble();
+        scanner.nextLine(); // consume newline
 
         if (transactionController.transfer(loggedInUser.getId(), receiverCardNumber, amount)) {
             System.out.println("Transfer successful!");
@@ -199,7 +169,6 @@ public class ConsoleView {
         }
     }
 
-
     private void viewResources() {
         Resources resources = resourcesController.getResources();
         System.out.println("Current ATM resources: ");
@@ -208,13 +177,19 @@ public class ConsoleView {
         System.out.println("Cash: $" + resources.getCash());
     }
 
+    private void refillInk() {
+        resourcesController.refillInk();
+        System.out.println("Ink has been refilled.");
+    }
 
-    private void refillResources() {
-        if (resourcesController.refillResources()) {
-            System.out.println("Resources have been successfully refilled!");
-        } else {
-            System.out.println("Failed to refill resources.");
-        }
+    private void refillPaper() {
+        resourcesController.refillPaper();
+        System.out.println("Paper has been refilled.");
+    }
+
+    private void refillBoth() {
+        resourcesController.refillAll();
+        System.out.println("Resources have been refilled.");
     }
 
     private void addNewUser() {
@@ -230,6 +205,7 @@ public class ConsoleView {
         System.out.print("Enter initial balance: ");
         double balance = scanner.nextDouble();
         scanner.nextLine();
+
         System.out.print("Enter role (customer/technician): ");
         String role = scanner.nextLine();
 
@@ -253,5 +229,59 @@ public class ConsoleView {
                 System.out.println("------------------------------------------");
             }
         }
+    }
+
+    // ======= NEW METHODS FOR TECHNICIAN MENU WITH CASH REFILL =======
+
+    private void showTechnicianMenu() {
+        while (true) {
+            System.out.println("\nTechnician Menu:");
+            System.out.println("1. View ATM Resources");
+            System.out.println("2. Refill Ink");
+            System.out.println("3. Refill Paper");
+            System.out.println("4. Refill Cash");
+            System.out.println("5. Refill All");
+            System.out.println("6. Logout");
+            System.out.print("Select an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    viewResources();
+                    break;
+                case 2:
+                    refillInk();
+                    break;
+                case 3:
+                    refillPaper();
+                    break;
+                case 4:
+                    refillCash();
+                    break;
+                case 5:
+                    refillAll();
+                    break;
+                case 6:
+                    System.out.println("Logging out...");
+                    loggedInUser = null;
+                    return;
+                default:
+                    System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    private void refillCash() {
+        resourcesController.refillCash();
+        System.out.println("Cash has been refilled.");
+    }
+
+    private void refillAll() {
+        resourcesController.refillInk();
+        resourcesController.refillPaper();
+        resourcesController.refillCash();
+        System.out.println("Ink, Paper, and Cash have been refilled.");
     }
 }

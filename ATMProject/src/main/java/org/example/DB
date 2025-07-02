@@ -43,8 +43,8 @@ INSERT INTO users (name, card_number, pin, balance, role) VALUES
 ('dolores', 'card3', '1122', 0.00,  'customer');
 
 -- Step 8: Insert initial resource values
-INSERT INTO resources (ink, paper, cash, software_update)
-VALUES (100, 100, 1000, 100);
+INSERT INTO resources (ink, paper, cash)
+VALUES (100, 100, 1000);
 
 -- Step 9: Show inserted users
 SELECT * FROM users;

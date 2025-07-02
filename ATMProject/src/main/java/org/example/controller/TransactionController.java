@@ -10,33 +10,55 @@ public class TransactionController {
     ResourcesDAO resourcesDAO = new ResourcesDAO();
     ResourcesController resourcesController = new ResourcesController(resourcesDAO);
 
+    private boolean canProceedWithTransaction() {
+        int ink = resourcesController.getResources().getInk();
+        int paper = resourcesController.getResources().getPaper();
+
+        // Block if either ink or paper is 0 or less
+        if (ink <= 0 || paper <= 0) {
+            return false;
+        }
+        return true;
+    }
+
+
     public boolean deposit(int userId, double amount) {
+        if (!canProceedWithTransaction()) {
+            return false; // block transaction if resources are depleted
+        }
+
         User user = userDAO.getUserById(userId);
         if (user != null && amount > 0) {
             double newBalance = user.getBalance() + amount;
             userDAO.updateUserBalance(userId, newBalance);
             transactionDAO.addTransaction(userId, "Deposit", amount);
             resourcesController.updateResourcesAfterTransaction(amount, true);
-
             return true;
         }
         return false;
     }
 
     public boolean withdraw(int userId, double amount) {
+        if (!canProceedWithTransaction()) {
+            return false; // block transaction if resources are depleted
+        }
+
         User user = userDAO.getUserById(userId);
         if (user != null && user.getBalance() >= amount && amount > 0) {
             double newBalance = user.getBalance() - amount;
             userDAO.updateUserBalance(userId, newBalance);
             transactionDAO.addTransaction(userId, "Withdrawal", amount);
             resourcesController.updateResourcesAfterTransaction(amount, false);
-
             return true;
         }
         return false;
     }
 
     public boolean transfer(int senderId, String receiverCardNumber, double amount) {
+        if (!canProceedWithTransaction()) {
+            return false; // block transaction if resources are depleted
+        }
+
         User sender = userDAO.getUserById(senderId);
         User receiver = userDAO.getUserByCardNumber(receiverCardNumber);
 
